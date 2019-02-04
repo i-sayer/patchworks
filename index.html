@@ -1,52 +1,392 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>IWS</title>
-  <style>
-@import url('https://fonts.googleapis.com/css?family=Shadows Into Light');
-body {
-  margin:0;
-  box-sizing: border-box;
-  font-family: 'Shadows Into Light', sans-serif;
-  font-size: 18px;
-  line-height:1;
-}
-.outer{
-display: flex;
-  height: 100%;/*calc(100% - 16px);*/
-  background: linear-gradient(12.5deg, transparent 50%, rgb(66, 34, 41) 50%), linear-gradient(#c8c8c8, transparent) ;
-}
-.inner{margin: auto ; text-align: center}
-h2 {
-  font-size: calc(0.95rem + 2.5vmin);
-  font-weight: normal;
-  color: gray;
-}
-h1 {
-  font-size: calc(9vmin);
-  color: white;
-  font-weight:normal;
-}
-ul {list-style:none; color:rgb(66, 34, 41); line-height: 2}
-img {width:calc(5rem + 26vmin)}
-a {text-decoration: none; color:rgb(66, 34, 41)}
-  </style>
+	<meta charset="utf-8">
+	<title>title</title>
+	<!--link rel="stylesheet" href="style.css">
+	<script src="script.js"></script-->
+	<style>
+		html {
+		box-sizing: border-box;
+		}
+		*, *:before, *:after {
+		box-sizing: inherit;
+		}
+		body {margin: 0; padding: 0;}
+		canvas {
+			position: absolute;
+			top: 0; left: 0;
+			pointer-events: none;
+		}
+		.canvas-wrap {
+			background-image: url(../_images/moogmum.png);
+			background-size: cover;
+			width: 341px; height: 688px;
+			position: absolute;
+			top: 0; left: 0;
+			padding-top: 0.9%;
+			padding-left: 0.4%;
+			display: grid;
+			grid-template-columns: repeat(4, 24.55%);
+			grid-template-rows: repeat(8, 12.25%);
+		}
+		.socket {
+			border: 1px solid transparent;
+			transition: border-color 0.3s ease;
+		}
+		.socket:hover {
+			border-color: orange;
+		}
+	</style>
 </head>
 <body>
-<div class="outer">
-  <div class="inner">
-    <h1>Ian Walter Sayer</h1>
-	<img src="_images/ianandruth10.jpg" title="Me and Ruth" />
-<h2>Some reasonably obscure projects</h2>
-<ul>
-<li><a href="sharc.html">Sharc Timbre Database Interactive</a></li>
-<li><a href="drum-roms.html">Audition-able 80s Drum ROM collection</a></li>
-<li><a href="nmg2/yomo2g2.html">Nord Modular G2 Utilities</a></li>
-<ul>
-  </div>
-</div>
+	<div class="canvas-wrap"><div class="socket"></div>
+	<div class="socket">.</div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div>
+	<div class="socket"></div></div>
+		<canvas id="canvas" width="341" height="688"></canvas>
+
+<script>
+
+var FastVector  = function(x,y){
+	this.x = x;
+	this.y = y;
+};
+
+FastVector.prototype = {
+	
+	add: function (B,internal) {
+		var nx, ny;
+		if (typeof(B)=='number'){
+			nx = this.x+B;
+			ny = this.y+B;
+		}else{
+			nx = this.x+B.x;
+			ny = this.y+B.y;
+		}
+		return new FastVector(nx,ny);
+	},
+	dot: function(B) {
+		return ((this.x*B.x)+(this.y*B.y));
+	},
+	length: function() {
+		return Math.sqrt((this.x*this.x)+(this.y*this.y));
+	},
+	multiply: function(B) {
+		var nx, ny;
+		if (typeof(B)=='number'){
+			nx = this.x*B; ny = this.y*B;
+		}else{ 
+			nx = this.x*B.x; ny = this.y*B.y;
+		}
+		return new FastVector(nx,ny);
+	},
+	squaredLength: function(args) {
+		return (this.x*this.x)+(this.y*this.y);
+	},
+	sum: function(){
+		return this.x+this.y;
+	},
+	subtract: function(B) {
+		var nx, ny;
+		if (typeof(B) == 'number'){
+			nx = this.x-B; ny = this.y-B;
+		}else{
+			nx = this.x-B.x; ny = this.y-B.y;
+		}
+		return new FastVector(nx,ny);
+	},
+	toString: function() {
+		return "["+this.x+","+this.y+"]";
+	}
+
+};
+////////////////////////////////////// canvas.js
+
+(function(){
+
+var two_pi = Math.PI * 2;
+
+var Canvas = this.Canvas = function(canvas){
+	// canvas.width = window.innerWidth;
+	// canvas.height = window.innerHeight;
+	this.canvas = canvas;
+	this.ctx = this.canvas.getContext('2d');
+	this.ctx.strokeStyle = 'red';
+	this.ctx.lineWidth = 10;
+	this.ctx.lineCap = "round";
+	this.ctx.shadowBlur = 6;
+	this.ctx.shadowColor = "#420";
+	this.ctx.shadowOffsetY = 3;
+	
+	this.width = this.canvas.width;
+	this.height = this.canvas.height;
+};
+
+Canvas.prototype={
+	adjust: function(pos) {
+		var lx = this.canvas.offsetLeft,
+			ly = this.canvas.offsetTop,
+			px = pos.x,
+			py = pos.y;
+		
+		var inside = (px > lx && px < lx + this.width && py > ly && py < ly + this.height);
+		
+		return inside ? new FastVector((pos.x - lx) / this.canvas.width, (pos.y - ly) / this.canvas.height) : null;
+	},
+	
+	clear: function(){
+		this.ctx.clearRect(0, 0, this.width, this.height);
+	}
+};
+	
+})();
+////////////////////////////////////////////////////// point.js
+
+var Point = function(canvas, x, y){
+	this.canvas = canvas;
+	this.current = this.previous = new FastVector(x, y);
+	
+	this.mass = this.inv_mass = 1;
+	
+	this.force = new FastVector(0.0,0.25).multiply(0.3 * 0.3);
+	this.radius = 3;
+};
+
+Point.prototype = {
+	
+	setCurrent: function(p) {
+		this.current = p;
+	},
+	
+	setPrevious: function(p) {
+		this.previous = p;
+	},
+	
+	getCurrent: function() {
+		return this.current;
+	},
+	
+	getPrevious: function() {
+		return this.previous;
+	},
+	
+	move: function() {
+		if (this.inv_mass!=0){
+			var new_pos = this.current.multiply(1.99).subtract(this.previous.multiply(0.99)).add(this.force);
+			new_pos.x = (new_pos.x < 0) ? 0 : ((new_pos.x > 1) ? 1 : new_pos.x);
+			new_pos.y = (new_pos.y < 0) ? 0 : ((new_pos.y > 1) ? 1 : new_pos.y);
+			this.previous = this.current;
+			this.current = new_pos;
+		}
+	}
+	
+};
+////////////////////////////////// constraint.js
+
+var Constraint = function(canvas, p1, p2, rl){
+	this.canvas = canvas;
+	this.p1 = p1;
+	this.p2 = p2;
+	this.rest_length = rl || p1.getCurrent().subtract(p2.getCurrent()).length();
+	this.squared_rest_length = this.rest_length * this.rest_length;
+};
+
+Constraint.prototype = {
+	satisfy: function(){
+		var p1 = this.p1.getCurrent();
+		var p2 = this.p2.getCurrent();
+		var delta = p2.subtract(p1);
+		
+		var p1_im = this.p1.inv_mass;
+		var p2_im = this.p2.inv_mass;
+		
+		var d = delta.squaredLength();
+		
+		var diff = (d - this.squared_rest_length) / ((this.squared_rest_length + d) * (p1_im + p2_im));
+		
+		if (p1_im != 0){
+			this.p1.setCurrent(p1.add(delta.multiply(p1_im * diff)));
+		}
+		
+		if (p2_im != 0){
+			this.p2.setCurrent( p2.subtract(delta.multiply(p2_im*diff)) );
+		}
+	}
+};
+
+////////////////////////////////// wire.js
+
+document.addEventListener("DOMContentLoaded", function(){
+	var canvas = new Canvas(document.getElementById('canvas')),
+		wire = new Wire(canvas),
+		inputs = {}, point,
+		key_down, mouse_down, mouse;
+	
+	var position = function(event){
+		return canvas.adjust({
+			x: event.pageX,
+			y: event.pageY
+		});
+	};
+	
+	var setPoint = function(inv_mass){
+		if (!point) return;
+		if (mouse) {
+			point.setCurrent(mouse);
+			point.setPrevious(mouse);
+		}
+		point.inv_mass = inv_mass;
+	};
+
+	var ev = {
+		'keydown': function(event){
+			key_down = true;
+		},
+		
+		'keyup': function(){
+			key_down = false;
+		},
+		
+		'mousedown': function(event){
+			mouse_down = true;
+			mouse = position(event);
+			
+			if (!mouse) return;
+			
+			point = wire.getClosestPoint(mouse);
+			setPoint(0);
+		},
+		
+		'mouseup': function(event){
+			mouse_down = false;
+			if (mouse) setPoint( key_down ? 0 : 1);
+		},
+		
+		'mousemove': function(event){
+			if (!mouse_down) return;
+			
+			mouse = position(event);
+			setPoint(mouse ? 0 : 1);
+		}
+	};
+	for (e in ev)
+		document.addEventListener(e, ev[e], false);
+	
+	setInterval(wire.update.bind(wire), 25);
+}, false);
+
+var Wire = function(canvas){
+	
+	var max_points = 4,
+		width = canvas.width,
+		height = canvas.height,
+		max_dim = Math.max(width, height),
+		min_dim = Math.min(width, height),
+		x_offset = width * 0.2,
+		y_offset = height * 0.2,
+		spacing = width  / max_points;
+	
+	this.canvas = canvas;
+	this.points = [];
+	this.constraints = [];
+	
+	var num_x_points = this.num_x_points = 4;
+	var num_y_points = this.num_y_points = 1;//Math.round(max_points * (height / max_dim));
+	
+	var constraint;
+	
+	var y = y_offset;
+	
+	for (var i = 0; i < 4; i++){
+		var point = new Point(canvas, (0.145)+(i*0.2455), (0.085)+(i*0.123));
+		this.points[i] = point;
+					
+		//add horizontal constraints
+		if (i > 0){
+			constraint = new Constraint(canvas, this.points[i - 1], this.points[i]);
+			this.constraints.push(constraint);
+		}
+	}
+	//pin the top right and top left.
+	this.points[0].inv_mass = this.points[3].inv_mass = 0;
+};
+
+Wire.prototype = {
+	
+	update: function() {
+		this.canvas.clear();
+		
+		//move each point with a pull from gravity
+        this.points[0].move();
+        this.points[1].move();
+        this.points[2].move();
+        this.points[3].move();
+		
+		//make sure all the constraints are satisfied.
+        this.constraints[0].satisfy();
+        this.constraints[1].satisfy();
+        this.constraints[2].satisfy();
+		
+		var w = this.canvas.width;
+		var h = this.canvas.height;
+
+		this.canvas.ctx.beginPath();
+		this.canvas.ctx.moveTo(this.points[0].current.x * w, this.points[0].current.y * h);
+		this.canvas.ctx.bezierCurveTo(this.points[1].current.x * w, this.points[1].current.y * h,
+			this.points[2].current.x * w, this.points[2].current.y * h,
+			this.points[3].current.x * w, this.points[3].current.y * h);
+		this.canvas.ctx.stroke();
+	},
+	
+	getClosestPoint: function(pos) {
+		var min_dist = 1,
+			min_point = null,
+			num_x = this.num_x_points,
+			num_y = this.num_y_points,
+			dist, i, j;
+		
+		for (j = 0; j < num_x; j++){
+			dist = pos.subtract(this.points[j].getCurrent()).length();
+			
+			if (dist < min_dist){
+				min_dist = dist;
+				min_point = this.points[j];
+			}
+		}
+		
+		return min_point;
+	}
+};
+
+</script>
 </body>
 </html>
