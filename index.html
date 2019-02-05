@@ -3,6 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<title>Patchwerk</title>
+	<link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:700" rel="stylesheet">
 	<!--link rel="stylesheet" href="style.css">
 	<script src="script.js"></script-->
 	<style>
@@ -12,19 +13,19 @@
 		*, *:before, *:after {
 		box-sizing: inherit;
 		}
-		body {margin: 0; padding: 0;}
+		body {
+			margin: 0;
+			padding: 0;
+			font-family: 'Roboto Condensed', sans-serif;
+			color: #eee;
+		}
 		canvas {
 			position: absolute;
 			top: 0; left: 0;
 			pointer-events: none;
 		}
 		.canvas-wrap {
-<<<<<<< HEAD
-			background-image: url(images/moogmum.png);
-=======
-			background-image: url("images/moogmum.png");
->>>>>>> ae9dbfb5874d08455b69e5dcd25f4c29e63c644f
-			background-size: cover;
+			background-color: black;
 			width: 341px; height: 688px;
 			position: absolute;
 			top: 0; left: 0;
@@ -35,17 +36,34 @@
 			grid-template-rows: repeat(8, 12.25%);
 		}
 		.socket {
-			border: 1px solid transparent;
-			transition: border-color 0.3s ease;
+			background: url(images/socket.png) no-repeat center;
+			background-size: 60%;
+			background-position-y: 16px;
+			color: seashell;
+			border-radius: 6px;
+			font-size: small;
+			text-align: center;
+			box-shadow: 0 0 8px inset black;
+			transition: box-shadow 0.2s ease;
 		}
 		.socket:hover {
-			border-color: orange;
+			box-shadow: 0 0 33px inset orange;
+		}
+		.socket[data-label]::before{
+			content: attr(data-label);
+			display: inline-block;
+			white-space: nowrap;
+		}
+		.socket.output[data-label]::before{
+			color: black;
+			background-color: azure;
+			padding: 0 3px;
 		}
 	</style>
 </head>
 <body>
 	<div class="canvas-wrap"><div class="socket"></div>
-	<div class="socket">.</div>
+	<div class="socket"></div>
 	<div class="socket"></div>
 	<div class="socket"></div>
 	<div class="socket"></div>
@@ -79,6 +97,22 @@
 		<canvas id="canvas" width="341" height="688"></canvas>
 
 <script>
+const labels = [
+	"ext. audio","mix cv","vca cv","VCA",
+	"NOISE","vcf cutoff","vcf res","VCF",
+	"vco 1v/oct","vco lin fm","VCO SAW","VCO PULSE",
+	"vco mod","lfo rate","LFO TRI","LFO SQ",
+	"mix 1","mix 2","vc mix ctrl","VC MIX",
+	"mult","MULT 1","MULT 2","ASSIGN",
+	"gate","EG","KB","GATE",
+	"tempo","mono mode","poly mode","depeche mode"
+];
+let domsoc = document.querySelectorAll(".socket");
+labels.forEach(function(u,i){
+	domsoc[i].setAttribute("data-label",u.toUpperCase());
+	if (u.charAt(0)<="Z")
+		domsoc[i].classList.add("output");
+});
 
 var FastVector  = function(x,y){
 	this.x = x;
